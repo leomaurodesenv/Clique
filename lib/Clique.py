@@ -6,7 +6,6 @@ import scipy.sparse.csgraph
 
 from Cluster import Cluster
 from sklearn import metrics
-from ast import literal_eval
 
 from Visualization import plot_clusters
 
@@ -168,16 +167,6 @@ def get_one_dim_dense_units(data, tau, xsi):
     return one_dim_dense_units
 
 
-# Normalize data in all features (1e-5 padding is added because clustering works on [0,1) interval)
-def normalize_features(data):
-    normalized_data = data
-    number_of_features = np.shape(normalized_data)[1]
-    for f in range(number_of_features):
-        normalized_data[:, f] -= min(normalized_data[:, f]) - 1e-5
-        normalized_data[:, f] *= 1 / (max(normalized_data[:, f]) + 1e-5)
-    return normalized_data
-
-
 def evaluate_clustering_performance(clusters, labels):
     set_of_dimensionality = set()
     for cluster in clusters:
@@ -237,42 +226,79 @@ def read_data(delimiter, feature_columns, path):
     return np.genfromtxt(path, dtype=float, delimiter=delimiter, usecols=feature_columns)
 
 
-# Sample run: python Clique.py mouse.csv [0,1] 2 3 0.1 " " output_clusters.txt
-if __name__ == "__main__":
-    # Clustering with command line parameters
-    if len(sys.argv) > 7:
-        file_name = sys.argv[1]
-        feature_columns = literal_eval(sys.argv[2])
-        label_column = int(sys.argv[3])
-        xsi = int(sys.argv[4])
-        tau = float(sys.argv[5])
-        delimiter = sys.argv[6]
-        output_file = sys.argv[7]
-    # Sample clustering with default parameters
-    else:
-        file_name = "mouse.csv"
-        feature_columns = [0, 1]
-        label_column = 2
-        xsi = 3
-        tau = 0.1
-        delimiter = ' '
-        output_file = "clusters.out"
+"""
+@module: Clique
+This module is execute the Clique algorithm
 
-    print("Running CLIQUE algorithm on " + file_name + " dataset, feature columns = " +
-          str(feature_columns) + ", label column = " + str(label_column) + ", xsi = " +
-          str(xsi) + ", tau = " + str(tau) + "\n")
+@authors: György Katona <georgekatona>, Leonardo Mauro <leomaurodesenv>
+@link: https://github.com/leomaurodesenv/Clique GitHub
+@license: MIT License 
+@copyright: 2019 György Katona
+@package: Clique
+@access: public
+"""
+
+class Clique:
+    ''' Clique Class '''
+
+    def __init__(self, data, labels, xsi, tau):
+        ''' 
+        Clique object construtor
+        @param data: original data
+        @param labels: original labels
+        @param xsi: Clique param
+        @param tau: Clique param
+        '''
+        self.data = self._normalize_features(data)
+        self.labels = labels
+        self.xsi = xsi
+        self.tau = tau
+
+    # Normalize data
+    def _normalize_features(self, data):
+        ''' 
+        Normalize data on [0,1) interval
+        @param data: original data
+        @return: normalized data [0,1)
+        '''
+        normalized_data = data
+        number_of_features = np.shape(normalized_data)[1]
+        for f in range(number_of_features):
+            normalized_data[:, f] -= min(normalized_data[:, f]) - 1e-5
+            normalized_data[:, f] *= 1 / (max(normalized_data[:, f]) + 1e-5)
+        return normalized_data
+
+
+# Sample run: python Clique.py
+if __name__ == "__main__":
+
+    # Sample clustering with default parameters
+    dataset_file = "../dataset_example.csv"
+    feature_columns = [0, 1]
+    label_column = 2
+    delimiter = ' '
+
+    xsi = 3
+    tau = 0.1
+    output_file = "../clusters.out"
+
+    print("CLIQUE configuration:\n"+
+          "- file: %s\n"%(dataset_file)+\
+          "- feature columns: %s\n"%(str(feature_columns))+\
+          "- label column: %d\n"%(label_column)+\
+          "- xsi: %d\n"%(xsi)+\
+          "- tau: %.4f\n"%(tau))
 
     # Read in data with labels
-    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), file_name)
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), dataset_file)
     original_data = read_data(delimiter, feature_columns, path)
     labels = read_labels(delimiter, label_column, path)
 
-    # Normalize each dimension to the [0,1] range
-    data = normalize_features(original_data)
+    model = Clique(original_data, labels, xsi, tau)
 
-    clusters = run_clique(data=data,
-                          xsi=xsi,
-                          tau=tau)
+    clusters = run_clique(data=model.data,
+                          xsi=model.xsi,
+                          tau=model.tau)
     save_to_file(clusters, output_file)
     print("\nClusters exported to " + output_file)
 
@@ -280,7 +306,7 @@ if __name__ == "__main__":
     evaluate_clustering_performance(clusters, labels)
 
     # Visualize clusters
-    title = ("DS: " + file_name + " - Params: Tau=" +
+    title = ("DS: " + dataset_file + " - Params: Tau=" +
              str(tau) + " Xsi=" + str(xsi))
     if len(feature_columns) <= 2:
-        plot_clusters(data, clusters, title, xsi)
+        plot_clusters(model.data, clusters, title, xsi)
