@@ -76,19 +76,19 @@ Using Windows if the python interpreter is not already in the $PATH environmenta
 
 On these platforms python interpreter is typically already added to $PATH, so from the directory of the .py file you can simply use:
 
-`python.exe Clique.py`
+`python Clique.py`
 
 #### Parameters
 
 Running the script without parameters runs a default clustering on one of datasets in the folder. To run it with your settings you can use the following parameters:
 
-`python Clique.py mouse.csv [0,1] 2 3 0.3 " " output_clusters.txt`
+`python Clique.py mouse.csv [0,1] 2 3 0.1 " " output_clusters.txt`
 
 - mouse.csv             - file name of the csv dataset provided in the same directory
 - [0,1]                 - numerical data columns of the dataset
 - 2                     - true labels of the clusters
 - 3                     - xsi parameter for CLIQUE
-- 0.3                   - tau parameter for CLIQUE
+- 0.1                   - tau parameter for CLIQUE
 - " "                   - separator used in csv
 - output_clusters.txt   - output file name
 

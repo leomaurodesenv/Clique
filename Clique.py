@@ -237,7 +237,7 @@ def read_data(delimiter, feature_columns, path):
     return np.genfromtxt(path, dtype=float, delimiter=delimiter, usecols=feature_columns)
 
 
-# Sample run: python Clique.py mouse.csv [0,1] 2 3 0.3 " " output_clusters.txt
+# Sample run: python Clique.py mouse.csv [0,1] 2 3 0.1 " " output_clusters.txt
 if __name__ == "__main__":
     # Clustering with command line parameters
     if len(sys.argv) > 7:
@@ -256,7 +256,7 @@ if __name__ == "__main__":
         xsi = 3
         tau = 0.1
         delimiter = ' '
-        output_file = "clusters.txt"
+        output_file = "clusters.out"
 
     print("Running CLIQUE algorithm on " + file_name + " dataset, feature columns = " +
           str(feature_columns) + ", label column = " + str(label_column) + ", xsi = " +
